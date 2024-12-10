@@ -1,0 +1,20 @@
+Dec 10, 2024 1:10:34 AM rmi.InventoryClient main
+INFO: Login successful for user: admin
+Dec 10, 2024 1:10:56 AM rmi.InventoryClient main
+INFO: Product added: ID: 0 | Name: Cup | Category: Accessory | Quantity: 20 | Price: 10.00
+Dec 10, 2024 1:12:40 AM rmi.InventoryClient main
+WARNING: Failed login attempt for username: employee
+Dec 10, 2024 1:13:10 AM rmi.InventoryClient main
+INFO: Login successful for user: employee1
+Dec 10, 2024 1:13:17 AM rmi.InventoryClient main
+INFO: User employee1 exited the system.
+Dec 10, 2024 1:14:49 AM rmi.InventoryClient main
+INFO: Login successful for user: admin
+Dec 10, 2024 1:14:55 AM rmi.InventoryClient main
+INFO: User admin exited the system.
+Dec 10, 2024 1:15:20 AM rmi.InventoryClient main
+INFO: Login successful for user: admin
+Dec 10, 2024 1:15:26 AM rmi.InventoryClient main
+INFO: Product deleted with ID: 6
+Dec 10, 2024 12:34:06 PM rmi.InventoryClient main
+INFO: Login successful for user: admin
