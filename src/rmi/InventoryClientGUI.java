@@ -9,12 +9,10 @@ import models.Product;
 import dao.EmployeeDAO;
 import models.Employee;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
-
-
 import java.rmi.Naming;
 import java.sql.*;
 import java.util.List;
+import java.util.logging.*;
 
 public class InventoryClientGUI extends Application {
     private static Connection connection;
@@ -22,6 +20,19 @@ public class InventoryClientGUI extends Application {
     private PasswordField passwordField;
     private Label statusLabel;
     private Button loginButton;
+
+    private static Logger logger = Logger.getLogger(InventoryClientGUI.class.getName());
+
+    static {
+        try {
+            // Configure the logger to write to a file with appending enabled
+            FileHandler fileHandler = new FileHandler("inventory_operations.log", true);
+            fileHandler.setFormatter(new SimpleFormatter());
+            logger.addHandler(fileHandler);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] args) {
         launch(args);
@@ -64,10 +75,15 @@ public class InventoryClientGUI extends Application {
             if (employee != null) {
                 statusLabel.setText("Login successful! Welcome, " + employee.getUsername());
 
+                // Log successful login
+                logger.info("User " + username + " logged in successfully.");
+
                 // Transition to the inventory menu
                 showInventoryMenu(primaryStage, employee);
             } else {
                 statusLabel.setText("Invalid username or password.");
+                // Log failed login attempt
+                logger.warning("Failed login attempt for username: " + username);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -84,36 +100,35 @@ public class InventoryClientGUI extends Application {
 
         // Add action handlers
         if (employee.getRole().equalsIgnoreCase("admin")) {
-            addProductButton.setOnAction(event -> showAddProductWindow(primaryStage));
-            updateProductButton.setOnAction(event -> showUpdateProductWindow(primaryStage));
-            deleteProductButton.setOnAction(event -> showDeleteProductWindow(primaryStage));
+            addProductButton.setOnAction(event -> {
+                showAddProductWindow(primaryStage);
+                logger.info("Admin " + employee.getUsername() + " opened Add Product window.");
+            });
+            updateProductButton.setOnAction(event -> {
+                showUpdateProductWindow(primaryStage);
+                logger.info("Admin " + employee.getUsername() + " opened Update Product window.");
+            });
+            deleteProductButton.setOnAction(event -> {
+                showDeleteProductWindow(primaryStage);
+                logger.info("Admin " + employee.getUsername() + " opened Delete Product window.");
+            });
         }
 
         // Action for viewing products
         viewProductsButton.setOnAction(event -> viewAllProducts(employee));
 
         // Action for exiting
-        exitButton.setOnAction(event -> System.exit(0));
+        exitButton.setOnAction(event -> {
+            logger.info("User " + employee.getUsername() + " logged out.");
+            System.exit(0);
+        });
 
         // VBox layout to hold buttons, with dynamic resizing
         VBox menuLayout = new VBox(10, viewProductsButton, addProductButton, updateProductButton, deleteProductButton, exitButton);
         menuLayout.setStyle("-fx-padding: 20;");
         menuLayout.setAlignment(Pos.CENTER); // Center the buttons in the VBox
 
-        // Make the buttons stretchable within the VBox, and set proper alignment for the VBox
-        menuLayout.setPrefWidth(Region.USE_COMPUTED_SIZE);
-        menuLayout.setPrefHeight(Region.USE_COMPUTED_SIZE);
-
         Scene menuScene = new Scene(menuLayout, 300, 300);
-        menuScene.widthProperty().addListener((obs, oldVal, newVal) -> {
-            double width = newVal.doubleValue();
-            for (Node node : menuLayout.getChildren()) {
-                if (node instanceof Button) {
-                    ((Button) node).setMaxWidth(width - 40); // Adjust width for each button when resizing
-                }
-            }
-        });
-
         primaryStage.setScene(menuScene);
     }
 
@@ -137,6 +152,8 @@ public class InventoryClientGUI extends Application {
             productStage.setScene(productScene);
             productStage.setTitle("Product List");
             productStage.show();
+
+            logger.info("User " + employee.getUsername() + " viewed all products.");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -162,6 +179,7 @@ public class InventoryClientGUI extends Application {
 
                 service.addProduct(product);
                 addProductStage.close();
+                logger.info("Product added: " + product.getName() + " | Category: " + product.getCategory() + " | Quantity: " + product.getQuantity() + " | Price: " + product.getPrice());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -237,6 +255,7 @@ public class InventoryClientGUI extends Application {
 
                     service.updateProduct(product);
                     updateProductStage.close();
+                    logger.info("Product updated: ID " + id + " | New Name: " + product.getName() + " | New Category: " + product.getCategory());
                 } else {
                     showError("Please select a product to update.");
                 }
@@ -279,10 +298,11 @@ public class InventoryClientGUI extends Application {
                 String selectedProduct = productListView.getSelectionModel().getSelectedItem();
                 if (selectedProduct != null) {
                     // Extract the product ID from the selection string
-                    int id = Integer.parseInt(selectedProduct.split(" | ")[0].split(":")[1]);
+                    int id = Integer.parseInt(selectedProduct.split("\\|")[0].split(":")[1].trim());
 
                     service.deleteProduct(id);
                     deleteProductStage.close();
+                    logger.info("Product deleted: ID " + id);
                 } else {
                     showError("Please select a product to delete.");
                 }
@@ -294,15 +314,15 @@ public class InventoryClientGUI extends Application {
         VBox layout = new VBox(10, new Label("Select Product to Delete:"), productListView, submitButton);
         layout.setStyle("-fx-padding: 20;");
         layout.setAlignment(Pos.CENTER); // Center the form fields
-        Scene scene = new Scene(layout, 350, 250);
+        Scene scene = new Scene(layout, 300, 300);
 
         deleteProductStage.setScene(scene);
         deleteProductStage.setTitle("Delete Product");
         deleteProductStage.show();
     }
 
-    // Method to retrieve all products
     private List<Product> getAllProducts() {
+        // Get all products from the server via RMI
         try {
             InventoryService service = (InventoryService) Naming.lookup("rmi://localhost:1099/InventoryService");
             return service.getAllProducts();
@@ -312,8 +332,8 @@ public class InventoryClientGUI extends Application {
         }
     }
 
-    // Method to retrieve a product by its ID
     private Product getProductById(int id) {
+        // Get a product by ID
         try {
             InventoryService service = (InventoryService) Naming.lookup("rmi://localhost:1099/InventoryService");
             return service.getProductById(id);
@@ -326,6 +346,7 @@ public class InventoryClientGUI extends Application {
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
+        alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
     }

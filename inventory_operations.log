@@ -18,3 +18,11 @@ Dec 10, 2024 1:15:26 AM rmi.InventoryClient main
 INFO: Product deleted with ID: 6
 Dec 10, 2024 12:34:06 PM rmi.InventoryClient main
 INFO: Login successful for user: admin
+Dec 22, 2024 3:01:56 PM rmi.InventoryClient main
+INFO: Login successful for user: admin
+Dec 22, 2024 3:02:23 PM rmi.InventoryClient main
+INFO: Product updated: models.Product@49e5f737
+Dec 22, 2024 3:08:54 PM rmi.InventoryClientGUI authenticateAndShowMainMenu
+INFO: User admin logged in successfully.
+Dec 22, 2024 3:08:55 PM rmi.InventoryClientGUI viewAllProducts
+INFO: User admin viewed all products.
