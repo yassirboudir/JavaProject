@@ -48,8 +48,11 @@ Follow these steps to set up and run the application on your system:
    SOURCE inventory_system.sql;
 Update Database Credentials (if needed):
 Update the connection credentials in the InventoryClient.java file to match your local MySQL setup:
+
 connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/inventory_system", "your-username", "your-password");
+
 Step 2: Running the Application
+
 Navigate to the rmi folder in the project directory.
 Locate the Main file.
 Run the project by executing the Main file:
