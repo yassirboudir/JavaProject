@@ -174,4 +174,4 @@ License
 This project is for educational purposes and is not intended for commercial use. All rights reserved by the authors.
 
 Contact
-For any questions or issues, feel free to reach out to the contributors via email or through the SupMTI portal.
+Throught My email.
